@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Aardvark</title>
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/style3.css">
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">
+</head>
+<body>
+    <div class="page-header">
+        <img src="assets/images/aardvark_icon.png" id="arthur3">
+    </div><br>
+    <div class="container">
+        <br>
+        <p>Choose a plan to begin</p>
+        <div class="row" id="Eins">
+            <div class="col-sm-4 text-center" id="5"><button>5 Year</button></div>
+            <div class="col-sm-4 text-center" id="10"><button>10 Year</button></div>
+            <div class="col-sm-4 text-center" id="25"><button>25 Year</button></div>
+        </div>
+        <div class="row" >
+            <div class="col-sm-6">
+                <div class="row">
+                    <div class="col-sm-6 all" id='un'></div>
+                    <div class="col-sm-6 all" id='ichi'></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 all" id='deux0'></div>
+                    <div class="col-sm-6 all" id='ni1'></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 all" id='deux1'></div>
+                    <div class="col-sm-6 all" id='ni2'></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 all" id='deux2'></div>
+                    <div class="col-sm-6 all" id='ni3'></div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="row all" id="logoGoesHere"></div>
+                <div class="row all" id="payment"></div>
+                <div class="row" id="key"><span id="yellow">Yellow</span> is your monthly payment<br><span id="orange">Orange</span> is your remaining income.</div>
+            </div> 
+        </div>
+    </div>
+        <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+            <script type="text/javascript" src="jscharts.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
+    <script type="text/javascript">
+                var config1 = {
+    apiKey: "AIzaSyAnIDNBZUFPnCWqUZSpLLjp1GF4umID3Zw",
+    authDomain: "aardvark-college-debt.firebaseapp.com",
+    databaseURL: "https://aardvark-college-debt.firebaseio.com",
+    projectId: "aardvark-college-debt",
+    storageBucket: "aardvark-college-debt.appspot.com",
+    messagingSenderId: "582943288825"
+  };
+  firebase.initializeApp(config1);
+
+var database1 = firebase.database();
+
+//insert after
+
+  var config2 = {
+    apiKey: "AIzaSyC5FjqLE_GMe98pc1Q9BBEQwwM_MTsHtFs",
+    authDomain: "recentsearches-aa729.firebaseapp.com",
+    databaseURL: "https://recentsearches-aa729.firebaseio.com",
+    projectId: "recentsearches-aa729",
+    storageBucket: "recentsearches-aa729.appspot.com",
+    messagingSenderId: "302929858382"
+  };
+  firebase.initializeApp(config2, "recentSearches");
+
+  var database2 = firebase.database(firebase.app("recentSearches"));
+//insert before
+var staticIncome = [1];
+var averageIncome = [5, 10, 25];
+var college = localStorage.getItem("college").split(" ");
+college = college.join("%20");
+        $("#5").click(function() {
+            $(".all").html("");
+                var currentMajor = localStorage.getItem("major");
+    function callForSI(i) {
+      var majorQueryURL_stat = "https://aardvark-college-debt.firebaseio.com/income-by-major/" + currentMajor + "/static-median-income/year" + staticIncome[i] + ".json";
+      $.ajax({
+        url: majorQueryURL_stat,
+        method: "GET"
+      }).done(function(response) {
+                var apiUrl = 'https://www.statbureau.org/calculate-inflation-price-jsonp?jsoncallback=?';
+
+        
+            $.getJSON(apiUrl, {
+                country: 'united-states',
+                start: "2017/1/1",
+                end: (2017 + staticIncome[i]) + "/1/1",
+                amount: response,
+                format: true
+            })
+              .done(function (data) {
+                  var money = data;
+                          var text = $('<h4>').html('Median Income for Year ' + staticIncome[i] + ': <br>' + money);
+        $('#ichi').append(text);
+        
+       
+            $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + college + "&_fields=2013.cost.tuition.in_state,2013.cost.tuition.out_of_state,school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+                if (localStorage.getItem("location") == "out") {
+                    var cost = response.results[0]["2013.cost.tuition.out_of_state"];
+                } else {
+                    var cost = response.results[0]["2013.cost.tuition.in_state"];
+                }
+        money = money.split(" ");
+        money = money.join("");
+        money = money.split("$");
+        money = money.join("");
+        money = money / 12;
+        interest = localStorage.getItem("interest");
+        yearsRepay = 5;
+        cost = Number(cost);
+        interest = Number(interest);
+        yearsRepay = Number(yearsRepay);
+        cost = ((cost * localStorage.getItem("yearsAttend")) - (localStorage.getItem("persContrib")*4) - (localStorage.getItem("scholContrib")*4));
+        console.log((interest/12)*cost);
+        console.log(Math.pow(1+(interest/12),-yearsRepay*12));
+         cost = ((interest/12)*cost)/(1 - Math.pow(1+(interest/12),-yearsRepay*12));
+        //money = money.toFixed(0);
+        money = Number(money);
+        cost = Number(cost);
+        money = money.toFixed(2);
+        cost = cost.toFixed(2);
+        money = Number(money);
+        cost = Number(cost);
+        $("#payment").html("Your Monthly Payment: $" + cost);
+        var myData = new Array(['', cost], ['', money - cost]);
+        var colors = ['#FACC00', '#FB9900'];
+        var myChart = new JSChart('un', 'pie');
+        myChart.setDataArray(myData);
+        myChart.colorizePie(colors);
+        myChart.setTitleColor('#000000');
+        myChart.setPieUnitsColor('#000000');
+        myChart.setPieValuesColor('#000000');
+        myChart.setSize(300, 300);
+        //myChart.setBackgroundImage("money.jpg");
+        //myChart.set3D(true);
+        myChart.setPieRadius(120);
+        myChart.setPieValuesPrefix("$");
+        myChart.setPieValuesFontSize(20);
+        myChart.setPieValuesOffset(-50);
+        myChart.setTitle("");
+        myChart.draw();
+              });
+        
+});
+      });
+    }
+    function callForAI(i) {
+      var majorQueryURL_stat = "https://aardvark-college-debt.firebaseio.com/income-by-major/" + currentMajor + "/average-income/year" + averageIncome[i] + ".json";
+      $.ajax({
+        url: majorQueryURL_stat,
+        method: "GET"
+      }).done(function(response) {
+var apiUrl = 'https://www.statbureau.org/calculate-inflation-price-jsonp?jsoncallback=?';
+
+        
+            $.getJSON(apiUrl, {
+                country: 'united-states',
+                start: "2017/1/1",
+                end: (2017 + averageIncome[i]) + "/1/1",
+                amount: response,
+                format: true
+            })
+              .done(function (data) {
+                  var money = data;
+        
+        var text = $('<h4>').html('Average Income over ' + averageIncome[i] + ' years: <br>' + money);
+        $('#ni' + i).append(text);
+            $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + college + "&_fields=2013.cost.tuition.in_state,2013.cost.tuition.out_of_state,school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+                if (localStorage.getItem("location") == "out") {
+                    var cost = response.results[0]["2013.cost.tuition.out_of_state"];
+                } else {
+                    var cost = response.results[0]["2013.cost.tuition.in_state"];
+                }
+        money = money.split(" ");
+        money = money.join("");
+        money = money.split("$");
+        money = money.join("");
+        money = money / 12;
+        interest = localStorage.getItem("interest");
+        yearsRepay = 5;
+        cost = Number(cost);
+        interest = Number(interest);
+        yearsRepay = Number(yearsRepay);
+        cost = ((cost * localStorage.getItem("yearsAttend")) - (localStorage.getItem("persContrib")*4) - (localStorage.getItem("scholContrib")*4));
+        console.log((interest/12)*cost);
+        console.log(Math.pow(1+(interest/12),-yearsRepay*12));
+         cost = ((interest/12)*cost)/(1 - Math.pow(1+(interest/12),-yearsRepay*12));
+ 
+        //money = money.toFixed(0);
+        money = Number(money);
+        cost = Number(cost);
+        money = money.toFixed(2);
+        cost = cost.toFixed(2);
+        money = Number(money);
+        cost = Number(cost);
+        var myData = new Array(['', cost], ['', money - cost]);
+        var colors = ['#FACC00', '#FB9900'];
+        var myChart = new JSChart('deux' + i, 'pie');
+        myChart.setDataArray(myData);
+        myChart.colorizePie(colors);
+        myChart.setTitleColor('#000000');
+        myChart.setPieUnitsColor('#000000');
+        myChart.setPieValuesColor('#000000');
+        myChart.setSize(300, 300);
+        //myChart.setBackgroundImage("money.jpg");
+        //myChart.set3D(true);
+        myChart.setPieRadius(120);
+        myChart.setPieValuesPrefix("$");
+        myChart.setPieValuesFontSize(20);
+        myChart.setPieValuesOffset(-50);
+        myChart.setTitle("");
+        myChart.draw();
+    });
+      });
+          });
+    }
+    for (var i = 0; i < staticIncome.length; i++) {
+        callForSI(i);
+    }
+    for (var i = 0; i < averageIncome.length; i++) {
+        callForAI(i);
+    }
+        $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + localStorage.getItem("college") + "&_fields=school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+            
+                          var url = response.results[0]["school.school_url"];
+                          var logo = $("<img>").attr("id", "logo");
+                          logo.attr('src', 'https://logo.clearbit.com/' + url);
+                          $("#logoGoesHere").html(logo);
+                        });
+            });
+$("#10").click(function() {
+    $(".all").html("");
+                var currentMajor = localStorage.getItem("major");
+    function callForSI(i) {
+      var majorQueryURL_stat = "https://aardvark-college-debt.firebaseio.com/income-by-major/" + currentMajor + "/static-median-income/year" + staticIncome[i] + ".json";
+      $.ajax({
+        url: majorQueryURL_stat,
+        method: "GET"
+      }).done(function(response) {
+                var apiUrl = 'https://www.statbureau.org/calculate-inflation-price-jsonp?jsoncallback=?';
+
+        
+            $.getJSON(apiUrl, {
+                country: 'united-states',
+                start: "2017/1/1",
+                end: (2017 + staticIncome[i]) + "/1/1",
+                amount: response,
+                format: true
+            })
+              .done(function (data) {
+                  var money = data;
+                          var text = $('<h4>').html('Median Income for Year ' + staticIncome[i] + ': <br>' + money);
+        $('#ichi').append(text);
+        
+       
+            $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + college + "&_fields=2013.cost.tuition.in_state,2013.cost.tuition.out_of_state,school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+                if (localStorage.getItem("location") == "out") {
+                    var cost = response.results[0]["2013.cost.tuition.out_of_state"];
+                } else {
+                    var cost = response.results[0]["2013.cost.tuition.in_state"];
+                }
+        money = money.split(" ");
+        money = money.join("");
+        money = money.split("$");
+        money = money.join("");
+        money = money / 12;
+        interest = localStorage.getItem("interest");
+        yearsRepay = 10;
+        cost = Number(cost);
+        interest = Number(interest);
+        yearsRepay = Number(yearsRepay);
+        cost = ((cost * localStorage.getItem("yearsAttend")) - (localStorage.getItem("persContrib")*4) - (localStorage.getItem("scholContrib")*4));
+        console.log((interest/12)*cost);
+        console.log(Math.pow(1+(interest/12),-yearsRepay*12));
+         cost = ((interest/12)*cost)/(1 - Math.pow(1+(interest/12),-yearsRepay*12));
+        //money = money.toFixed(0);
+        money = Number(money);
+        cost = Number(cost);
+        money = money.toFixed(2);
+        cost = cost.toFixed(2);
+        money = Number(money);
+        cost = Number(cost);
+        $("#payment").html("Your Monthly Payment: $" + cost);
+        var myData = new Array(['', cost], ['', money - cost]);
+        var colors = ['#FACC00', '#FB9900'];
+        var myChart = new JSChart('un', 'pie');
+        myChart.setDataArray(myData);
+        myChart.colorizePie(colors);
+        myChart.setTitleColor('#000000');
+        myChart.setPieUnitsColor('#000000');
+        myChart.setPieValuesColor('#000000');
+        myChart.setSize(300, 300);
+        //myChart.setBackgroundImage("money.jpg");
+        //myChart.set3D(true);
+        myChart.setPieRadius(120);
+        myChart.setPieValuesPrefix("$");
+        myChart.setPieValuesFontSize(20);
+        myChart.setPieValuesOffset(-50);
+        myChart.setTitle("");
+        myChart.draw();
+              });
+        
+});
+      });
+    }
+    function callForAI(i) {
+      var majorQueryURL_stat = "https://aardvark-college-debt.firebaseio.com/income-by-major/" + currentMajor + "/average-income/year" + averageIncome[i] + ".json";
+      $.ajax({
+        url: majorQueryURL_stat,
+        method: "GET"
+      }).done(function(response) {
+var apiUrl = 'https://www.statbureau.org/calculate-inflation-price-jsonp?jsoncallback=?';
+
+        
+            $.getJSON(apiUrl, {
+                country: 'united-states',
+                start: "2017/1/1",
+                end: (2017 + averageIncome[i]) + "/1/1",
+                amount: response,
+                format: true
+            })
+              .done(function (data) {
+                  var money = data;
+        
+        var text = $('<h4>').html('Average Income over ' + averageIncome[i] + ' years: <br>' + money);
+        $('#ni' + i).append(text);
+            $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + college + "&_fields=2013.cost.tuition.in_state,2013.cost.tuition.out_of_state,school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+                if (localStorage.getItem("location") == "out") {
+                    var cost = response.results[0]["2013.cost.tuition.out_of_state"];
+                } else {
+                    var cost = response.results[0]["2013.cost.tuition.in_state"];
+                }
+        money = money.split(" ");
+        money = money.join("");
+        money = money.split("$");
+        money = money.join("");
+        money = money / 12;
+        interest = localStorage.getItem("interest");
+        yearsRepay = 10;
+        cost = Number(cost);
+        interest = Number(interest);
+        yearsRepay = Number(yearsRepay);
+        cost = ((cost * localStorage.getItem("yearsAttend")) - (localStorage.getItem("persContrib")*4) - (localStorage.getItem("scholContrib")*4));
+        console.log((interest/12)*cost);
+        console.log(Math.pow(1+(interest/12),-yearsRepay*12));
+         cost = ((interest/12)*cost)/(1 - Math.pow(1+(interest/12),-yearsRepay*12));
+ 
+        //money = money.toFixed(0);
+        money = Number(money);
+        cost = Number(cost);
+        money = money.toFixed(2);
+        cost = cost.toFixed(2);
+        money = Number(money);
+        cost = Number(cost);
+        var myData = new Array(['', cost], ['', money - cost]);
+        var colors = ['#FACC00', '#FB9900'];
+        var myChart = new JSChart('deux' + i, 'pie');
+        myChart.setDataArray(myData);
+        myChart.colorizePie(colors);
+        myChart.setTitleColor('#000000');
+        myChart.setPieUnitsColor('#000000');
+        myChart.setPieValuesColor('#000000');
+        myChart.setSize(300, 300);
+        //myChart.setBackgroundImage("money.jpg");
+        //myChart.set3D(true);
+        myChart.setPieRadius(120);
+        myChart.setPieValuesPrefix("$");
+        myChart.setPieValuesFontSize(20);
+        myChart.setPieValuesOffset(-50);
+        myChart.setTitle("");
+        myChart.draw();
+    });
+      });
+          });
+    }
+    for (var i = 0; i < staticIncome.length; i++) {
+        callForSI(i);
+    }
+    for (var i = 0; i < averageIncome.length; i++) {
+        callForAI(i);
+    }
+        $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + localStorage.getItem("college") + "&_fields=school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+                
+                          var url = response.results[0]["school.school_url"];
+                          var logo = $("<img>").attr("id", "logo");
+                          logo.attr('src', 'https://logo.clearbit.com/' + url);
+                          $("#logoGoesHere").html(logo);
+                        });
+            });
+$("#25").click(function() {
+    $(".all").html("");
+                var currentMajor = localStorage.getItem("major");
+    function callForSI(i) {
+      var majorQueryURL_stat = "https://aardvark-college-debt.firebaseio.com/income-by-major/" + currentMajor + "/static-median-income/year" + staticIncome[i] + ".json";
+      $.ajax({
+        url: majorQueryURL_stat,
+        method: "GET"
+      }).done(function(response) {
+                var apiUrl = 'https://www.statbureau.org/calculate-inflation-price-jsonp?jsoncallback=?';
+
+        
+            $.getJSON(apiUrl, {
+                country: 'united-states',
+                start: "2017/1/1",
+                end: (2017 + staticIncome[i]) + "/1/1",
+                amount: response,
+                format: true
+            })
+              .done(function (data) {
+                  var money = data;
+                          var text = $('<h4>').html('Median Income for Year ' + staticIncome[i] + ': <br>' + money);
+        $('#ichi').append(text);
+        
+       
+            $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + college + "&_fields=2013.cost.tuition.in_state,2013.cost.tuition.out_of_state,school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+                if (localStorage.getItem("location") == "out") {
+                    var cost = response.results[0]["2013.cost.tuition.out_of_state"];
+                } else {
+                    var cost = response.results[0]["2013.cost.tuition.in_state"];
+                }
+        money = money.split(" ");
+        money = money.join("");
+        money = money.split("$");
+        money = money.join("");
+        money = money / 12;
+        interest = localStorage.getItem("interest");
+        yearsRepay = 25;
+        cost = Number(cost);
+        interest = Number(interest);
+        yearsRepay = Number(yearsRepay);
+        cost = ((cost * localStorage.getItem("yearsAttend")) - (localStorage.getItem("persContrib")*4) - (localStorage.getItem("scholContrib")*4));
+        console.log((interest/12)*cost);
+        console.log(Math.pow(1+(interest/12),-yearsRepay*12));
+         cost = ((interest/12)*cost)/(1 - Math.pow(1+(interest/12),-yearsRepay*12));
+        //money = money.toFixed(0);
+        money = Number(money);
+        cost = Number(cost);
+        money = money.toFixed(2);
+        cost = cost.toFixed(2);
+        money = Number(money);
+        cost = Number(cost);
+        $("#payment").html("Your Monthly Payment: $" + cost);
+        var myData = new Array(['', cost], ['', money - cost]);
+        var colors = ['#FACC00', '#FB9900'];
+        var myChart = new JSChart('un', 'pie');
+        myChart.setDataArray(myData);
+        myChart.colorizePie(colors);
+        myChart.setTitleColor('#000000');
+        myChart.setPieUnitsColor('#000000');
+        myChart.setPieValuesColor('#000000');
+        myChart.setSize(300, 300);
+        //myChart.setBackgroundImage("money.jpg");
+        //myChart.set3D(true);
+        myChart.setPieRadius(120);
+        myChart.setPieValuesPrefix("$");
+        myChart.setPieValuesFontSize(20);
+        myChart.setPieValuesOffset(-50);
+        myChart.setTitle("");
+        myChart.draw();
+              });
+        
+});
+      });
+    }
+    function callForAI(i) {
+      var majorQueryURL_stat = "https://aardvark-college-debt.firebaseio.com/income-by-major/" + currentMajor + "/average-income/year" + averageIncome[i] + ".json";
+      $.ajax({
+        url: majorQueryURL_stat,
+        method: "GET"
+      }).done(function(response) {
+var apiUrl = 'https://www.statbureau.org/calculate-inflation-price-jsonp?jsoncallback=?';
+
+        
+            $.getJSON(apiUrl, {
+                country: 'united-states',
+                start: "2017/1/1",
+                end: (2017 + averageIncome[i]) + "/1/1",
+                amount: response,
+                format: true
+            })
+              .done(function (data) {
+                  var money = data;
+        
+        var text = $('<h4>').html('Average Income over ' + averageIncome[i] + ' years: <br>' + money);
+        $('#ni' + i).append(text);
+            $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + college + "&_fields=2013.cost.tuition.in_state,2013.cost.tuition.out_of_state,school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+                if (localStorage.getItem("location") == "out") {
+                    var cost = response.results[0]["2013.cost.tuition.out_of_state"];
+                } else {
+                    var cost = response.results[0]["2013.cost.tuition.in_state"];
+                }
+        money = money.split(" ");
+        money = money.join("");
+        money = money.split("$");
+        money = money.join("");
+        money = money / 12;
+        interest = localStorage.getItem("interest");
+        yearsRepay = 25;
+        cost = Number(cost);
+        interest = Number(interest);
+        yearsRepay = Number(yearsRepay);
+        cost = ((cost * localStorage.getItem("yearsAttend")) - (localStorage.getItem("persContrib")*4) - (localStorage.getItem("scholContrib")*4));
+        console.log((interest/12)*cost);
+        console.log(Math.pow(1+(interest/12),-yearsRepay*12));
+         cost = ((interest/12)*cost)/(1 - Math.pow(1+(interest/12),-yearsRepay*12));
+ 
+        //money = money.toFixed(0);
+        money = Number(money);
+        cost = Number(cost);
+        money = money.toFixed(2);
+        cost = cost.toFixed(2);
+        money = Number(money);
+        cost = Number(cost);
+        var myData = new Array(['', cost], ['', money - cost]);
+        var colors = ['#FACC00', '#FB9900'];
+        var myChart = new JSChart('deux' + i, 'pie');
+        myChart.setDataArray(myData);
+        myChart.colorizePie(colors);
+        myChart.setTitleColor('#000000');
+        myChart.setPieUnitsColor('#000000');
+        myChart.setPieValuesColor('#000000');
+        myChart.setSize(300, 300);
+        //myChart.setBackgroundImage("money.jpg");
+        //myChart.set3D(true);
+        myChart.setPieRadius(120);
+        myChart.setPieValuesPrefix("$");
+        myChart.setPieValuesFontSize(20);
+        myChart.setPieValuesOffset(-50);
+        myChart.setTitle("");
+        myChart.draw();
+    });
+      });
+          });
+    }
+    for (var i = 0; i < staticIncome.length; i++) {
+        callForSI(i);
+    }
+    for (var i = 0; i < averageIncome.length; i++) {
+        callForAI(i);
+    }
+        $.ajax({
+                url: "https://api.data.gov/ed/collegescorecard/v1/schools.json?api_key=laoOF5Sp6MOWzUvnPi53y2EYv2PNL4ju9HCla52z&school.name=" + localStorage.getItem("college") + "&_fields=school.school_url",
+                method: "GET"
+            }).done(function(response) {
+                
+                          var url = response.results[0]["school.school_url"];
+                          var logo = $("<img>").attr("id", "logo");
+                          logo.attr('src', 'https://logo.clearbit.com/' + url);
+                          $("#logoGoesHere").html(logo);
+                        });
+            });
+    </script>
+</body>
+</html>

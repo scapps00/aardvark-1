@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Aardvark</title>
+
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="awesomplete.css" />
+    <link rel="stylesheet" href="assets/css/style2.css">
+    
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">
+
+
+</head>
+
+<body>
+    <div class="page-header">
+        <img src="assets/images/aardvark_icon.png" id="arthur2">
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-7" id="uno">
+
+                <div>
+                    <h3>Pick your college</h3><br>
+                    <div class="form-group">
+                            <input type="text" class="awesomplete form-control" id="schoolName" data-list="" />
+                        <!--<input type="text" class="form-control" id="usr" placeholder="Full College Name"> -->
+                    </div><br>
+                    <h3>Pick your major</h3><br>
+                    <div class="btn-group" id="major">
+                  <button type="button" class="btn btn-primary" id="majorFill">Choose your Major</button>
+                  <button type="button" class="btn btn-danger dropdown-toggle" id="majorButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <ul class="dropdown-menu" id="majorDropdown">
+                    
+                  </ul>
+            </div>
+
+                    <br>
+                    <h3>How much money do you plan to contribute per year?</h3><br>
+                    <div class="form-group">
+
+                        <input type="text" class="form-control" id="persContrib" placeholder="Eg: 2500">
+                    </div>
+                    <br>
+                    <h3>How much do you plan to receive from scholarships or other non-loan programs per year?</h3><br>
+                    <div class="form-group">
+
+                        <input type="text" class="form-control" id="scholContrib" placeholder="Eg: 1500">
+                    </div><br>
+                    <h3>How many years do you plan to attend?</h3><br>
+                    <div class="form-group">
+
+                        <input type="text" class="form-control" id="yearsAttend" placeholder="Eg: 3">
+                    </div><br>
+                    <h3>Is the college in state or out of state?</h3><br>
+                    <label class="radio-inline"><input type="radio" id="in" name="optradio">In State</label>
+                    <label class="radio-inline"><input type="radio" id="out" name="optradio">Out of State</label><br>
+                    <br>
+                    <h3>What is the interest rate on your loan in decimal? (Choose .05 if you don't know)</h3><br>
+                    <div class="form-group">
+
+                        <input type="text" class="form-control" id="interest" placeholder="Eg: .05">
+                    </div><br>
+                    <button id="submit">Submit</button>
+
+                </div>
+
+            </div>
+            <div class="col-sm-1"></div>
+
+            <div class="col-sm-4" id="tres">
+                <div>
+                    <h3> Recent Searches<br><br><br><br></h3>
+                <div id="recentSearches"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="awesomplete.js" async></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
+    <script type="text/javascript">
+      var config1 = {
+    apiKey: "AIzaSyAnIDNBZUFPnCWqUZSpLLjp1GF4umID3Zw",
+    authDomain: "aardvark-college-debt.firebaseapp.com",
+    databaseURL: "https://aardvark-college-debt.firebaseio.com",
+    projectId: "aardvark-college-debt",
+    storageBucket: "aardvark-college-debt.appspot.com",
+    messagingSenderId: "582943288825"
+  };
+  firebase.initializeApp(config1, "cool");
+
+var database1 = firebase.database(firebase.app("cool"));
+
+//insert after
+
+  var config2 = {
+    apiKey: "AIzaSyC5FjqLE_GMe98pc1Q9BBEQwwM_MTsHtFs",
+    authDomain: "recentsearches-aa729.firebaseapp.com",
+    databaseURL: "https://recentsearches-aa729.firebaseio.com",
+    projectId: "recentsearches-aa729",
+    storageBucket: "recentsearches-aa729.appspot.com",
+    messagingSenderId: "302929858382"
+  };
+  firebase.initializeApp(config2, "recentSearches");
+
+  var database2 = firebase.database(firebase.app("recentSearches"));
+
+  database2.ref(localStorage.getItem("yrKey")).on("value", function(snapshot) {
+    console.log("hi");
+    console.log(snapshot.val());
+    $("#recentSearches").html("");
+    for (var i = 0; i < snapshot.val().searches.length; i++) {
+      var link = $("<span>");
+      link.attr("id", "link" + i);
+      link.html(snapshot.val().searches[i].college + " (" + snapshot.val().searches[i].major + ")<br>");
+      if (i > 9) {
+        $("#link" + (i - 10)).html("");
+      }
+      $("#recentSearches").prepend(link);
+      $("#link" + i).click({param1: i}, function(event) {
+        localStorage.setItem("college", snapshot.val().searches[event.data.param1].college);
+        localStorage.setItem("major", snapshot.val().searches[event.data.param1].major);
+        localStorage.setItem("persContrib", snapshot.val().searches[event.data.param1].persContrib);
+        localStorage.setItem("scholContrib", snapshot.val().searches[event.data.param1].scholContrib);
+        localStorage.setItem("yearsAttend", snapshot.val().searches[event.data.param1].yearsAttend);
+        localStorage.setItem("location", snapshot.val().searches[event.data.param1].location);
+        localStorage.setItem("interest", snapshot.val().searches[event.data.param1].interest);
+        location.replace("page3.html");
+      });
+    }
+  });
+  
+
+//insert before
+var staticIncome = [1, 5, 10, 25];
+var averageIncome = [5, 10, 25];
+
+database1.ref("income-by-major").once("value").then(function(snapshot) {
+  snapshot.forEach(function(childSnapshot) {
+    var key = childSnapshot.key;
+    var listItem = $('<li>');
+    var linkForItem = $('<a>').addClass('majorChosen').attr('href', '#').text(key);
+    listItem.append(linkForItem);
+    $('#majorDropdown').append(listItem);
+  });
+  $('.majorChosen').on('click', function(event) {
+    event.preventDefault();
+    var major = $(this).text();
+    console.log(major);
+    $('#majorFill').text(major);
+  });
+});
+    $("#submit").click(function() {
+      localStorage.setItem("college", $("#schoolName").val());
+      localStorage.setItem("major", $("#majorFill").text());
+      localStorage.setItem("persContrib", $("#persContrib").val());
+      localStorage.setItem("scholContrib", $("#scholContrib").val());
+      localStorage.setItem("yearsAttend", $("#yearsAttend").val());
+      if (document.getElementById("in").checked == true) {
+        localStorage.setItem("location", "in");
+      } else if (document.getElementById("out").checked == true) {
+        localStorage.setItem("location", "out");
+      }
+      localStorage.setItem("interest", $("#interest").val());
+    
+    // insert after
+    var searchArray = [];
+    database2.ref(localStorage.getItem("yrKey")).on("value", function(snapshot) {
+      searchArray = snapshot.val().searches;
+      
+
+  });
+    
+    if (searchArray == []) {
+      searchArray = [{college: $("#schoolName").val(), major: $("#majorFill").text(), persContrib: $("#persContrib").val(), scholContrib: $("#scholContrib").val(), yearsAttend: $("#yearsAttend").val(), location: localStorage.getItem("location"), interest: $("#interest").val()}];
+    } else {
+    searchArray.push({college: $("#schoolName").val(), major: $("#majorFill").text(), persContrib: $("#persContrib").val(), scholContrib: $("#scholContrib").val(), yearsAttend: $("#yearsAttend").val(), location: localStorage.getItem("location"), interest: $("#interest").val()});
+  }
+  
+          database2.ref(localStorage.getItem("yrKey")).set({
+      searches: searchArray
+      
+        });
+        });
+    
+// window.onunload = function() {
+//   database2.ref(localStorage.getItem("yrKey")).remove();
+//     };
+    //insert before
+    //
+
+    </script>
+    
+</body>
+
+</html>
